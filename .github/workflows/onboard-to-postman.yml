@@ -1,0 +1,473 @@
+name: Onboard GrubHub Payments API To Postman
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - api-manifest.json
+      - specs/**
+      - .postman/resources.yaml
+      - .github/workflows/onboard-to-postman.yml
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: postman-onboarding-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  onboard:
+    if: >-
+      ${{
+        github.event_name != 'push' ||
+        (
+          github.actor != 'github-actions[bot]' &&
+          !startsWith(github.event.head_commit.message, 'chore: sync Postman artifacts and metadata') &&
+          !startsWith(github.event.head_commit.message, 'chore: persist Postman spec mapping')
+        )
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Resolve manifest inputs
+        id: manifest
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+
+          const manifest = JSON.parse(fs.readFileSync('api-manifest.json', 'utf8'));
+          const postman = manifest.postman && typeof manifest.postman === 'object'
+            ? manifest.postman
+            : {};
+          const outputPath = process.env.GITHUB_OUTPUT;
+
+          function readBoolean(value, fallback) {
+            if (typeof value === 'boolean') {
+              return value;
+            }
+            if (typeof value === 'string') {
+              const normalized = value.trim().toLowerCase();
+              if (normalized === 'true') {
+                return true;
+              }
+              if (normalized === 'false') {
+                return false;
+              }
+            }
+            return fallback;
+          }
+
+          function setOutput(name, value) {
+            fs.appendFileSync(
+              outputPath,
+              `${name}<<EOF\n${String(value)}\nEOF\n`,
+              'utf8'
+            );
+          }
+
+          setOutput('project_name', manifest.project_name || manifest.name || '');
+          setOutput('domain', manifest.domain || '');
+          setOutput('domain_code', manifest.domain_code || '');
+          setOutput('spec_path', manifest.spec_path || '');
+          setOutput(
+            'environments_json',
+            JSON.stringify(
+              Array.isArray(manifest.environments) && manifest.environments.length > 0
+                ? manifest.environments
+                : ['prod']
+            )
+          );
+          setOutput('runtime_urls_json', JSON.stringify(manifest.runtime_urls || {}));
+          setOutput('system_env_map_json', JSON.stringify(postman.system_env_map || {}));
+          setOutput('governance_mapping_json', JSON.stringify(postman.governance_mapping || {}));
+          setOutput('requester_email', postman.requester_email || '');
+          setOutput('workspace_admin_user_ids', postman.workspace_admin_user_ids || '');
+          setOutput('postman_team_id', postman.team_id || '');
+          setOutput('workspace_team_id', postman.workspace_team_id || '');
+          setOutput('integration_backend', postman.integration_backend || 'bifrost');
+          setOutput('org_mode', String(readBoolean(postman.org_mode, false)));
+          setOutput(
+            'require_system_env_association',
+            String(
+              Object.prototype.hasOwnProperty.call(postman, 'require_system_env_association')
+                ? readBoolean(postman.require_system_env_association, true)
+                : true
+            )
+          );
+          setOutput(
+            'require_api_catalog_link',
+            String(
+              Object.prototype.hasOwnProperty.call(postman, 'require_api_catalog_link')
+                ? readBoolean(postman.require_api_catalog_link, true)
+                : true
+            )
+          );
+          NODE
+
+      - name: Resolve existing Postman resource ids
+        id: resources
+        run: |
+          ruby <<'RUBY'
+          require 'json'
+          require 'yaml'
+
+          manifest = JSON.parse(File.read('api-manifest.json'))
+          resources_path = '.postman/resources.yaml'
+          data = File.exist?(resources_path) ? (YAML.load_file(resources_path) || {}) : {}
+          cloud = data['cloudResources'] || {}
+          collections = cloud['collections'] || {}
+          environments = cloud['environments'] || {}
+          specs = cloud['specs'] || {}
+
+          project_name = manifest['project_name'] || manifest['name'] || ''
+          spec_path = manifest['spec_path'] || ''
+          spec_key = "../#{spec_path.sub(%r{^/+}, '')}"
+          environment_uids = {}
+
+          environments.each do |file_path, uid|
+            match = file_path.match(%r{/environments/(.+)\.postman_environment\.json$})
+            next unless match
+
+            environment_uids[match[1]] = uid
+          end
+
+          environment_uids = environment_uids.sort.to_h
+
+          outputs = {
+            'workspace_id' => data.dig('workspace', 'id').to_s,
+            'spec_id' => specs[spec_key].to_s,
+            'baseline_collection_id' => collections["../postman/collections/[Baseline] #{project_name}"].to_s,
+            'smoke_collection_id' => collections["../postman/collections/[Smoke] #{project_name}"].to_s,
+            'contract_collection_id' => collections["../postman/collections/[Contract] #{project_name}"].to_s,
+            'environment_uids_json' => JSON.generate(environment_uids)
+          }
+
+          File.open(ENV.fetch('GITHUB_OUTPUT'), 'a') do |file|
+            outputs.each do |name, value|
+              file.puts "#{name}<<EOF"
+              file.puts value
+              file.puts 'EOF'
+            end
+          end
+          RUBY
+
+      - name: Generate local HTTPS certificate
+        run: |
+          mkdir -p .tmp/spec-host
+          openssl req \
+            -x509 \
+            -newkey rsa:2048 \
+            -sha256 \
+            -days 1 \
+            -nodes \
+            -keyout .tmp/spec-host/key.pem \
+            -out .tmp/spec-host/cert.pem \
+            -subj "/CN=localhost" \
+            -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+
+      - name: Start local spec host
+        run: |
+          mkdir -p .tmp/spec-host
+          nohup node <<'NODE' > .tmp/spec-host/server.log 2>&1 &
+          const fs = require('fs');
+          const https = require('https');
+          const path = require('path');
+
+          const root = process.cwd();
+          const port = 8443;
+          const cert = fs.readFileSync(path.join(root, '.tmp', 'spec-host', 'cert.pem'));
+          const key = fs.readFileSync(path.join(root, '.tmp', 'spec-host', 'key.pem'));
+
+          function contentType(filePath) {
+            if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
+              return 'application/yaml';
+            }
+            if (filePath.endsWith('.json')) {
+              return 'application/json';
+            }
+            return 'text/plain; charset=utf-8';
+          }
+
+          const server = https.createServer({ key, cert }, (req, res) => {
+            const requestPath = decodeURIComponent((req.url || '/').replace(/^\/+/, ''));
+            const safePath = path.normalize(requestPath).replace(/^(\.\.(\/|\\|$))+/, '');
+            const filePath = path.join(root, safePath);
+
+            if (!filePath.startsWith(root)) {
+              res.statusCode = 403;
+              res.end('forbidden');
+              return;
+            }
+
+            fs.readFile(filePath, (error, data) => {
+              if (error) {
+                res.statusCode = error.code === 'ENOENT' ? 404 : 500;
+                res.end(error.code === 'ENOENT' ? 'not found' : 'error');
+                return;
+              }
+
+              res.statusCode = 200;
+              res.setHeader('Content-Type', contentType(filePath));
+              res.end(data);
+            });
+          });
+
+          server.listen(port, '127.0.0.1');
+          NODE
+          echo $! > .tmp/spec-host/server.pid
+
+      - name: Verify local spec host
+        run: |
+          for attempt in 1 2 3 4 5; do
+            if curl --silent --show-error --fail --insecure \
+              "https://127.0.0.1:8443/${{ steps.manifest.outputs.spec_path }}" \
+              > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "Local HTTPS spec host did not become ready in time." >&2
+          exit 1
+
+      - name: Resolve system environment ids
+        id: system_envs
+        env:
+          INPUT_ENVIRONMENTS_JSON: ${{ steps.manifest.outputs.environments_json }}
+          INPUT_SYSTEM_ENV_MAP_JSON: ${{ vars.POSTMAN_SYSTEM_ENV_MAP_JSON || steps.manifest.outputs.system_env_map_json }}
+          INPUT_POSTMAN_TEAM_ID: ${{ vars.POSTMAN_TEAM_ID || steps.manifest.outputs.postman_team_id }}
+          INPUT_REQUIRE_SYSTEM_ENV_ASSOCIATION: ${{ vars.POSTMAN_REQUIRE_SYSTEM_ENV_ASSOCIATION || steps.manifest.outputs.require_system_env_association }}
+          POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+          POSTMAN_ACCESS_TOKEN: ${{ secrets.POSTMAN_ACCESS_TOKEN }}
+        run: node scripts/resolve-system-env-map.js
+
+      - name: Onboard To Postman
+        id: onboarding
+        uses: postman-cs/postman-api-onboarding-action@v0
+        with:
+          project-name: ${{ steps.manifest.outputs.project_name }}
+          domain: ${{ steps.manifest.outputs.domain }}
+          domain-code: ${{ steps.manifest.outputs.domain_code }}
+          governance-mapping-json: ${{ vars.POSTMAN_GOVERNANCE_MAPPING_JSON || steps.manifest.outputs.governance_mapping_json }}
+          workspace-id: ${{ vars.POSTMAN_WORKSPACE_ID || steps.resources.outputs.workspace_id }}
+          spec-id: ${{ vars.POSTMAN_SPEC_ID || steps.resources.outputs.spec_id }}
+          baseline-collection-id: ${{ vars.POSTMAN_BASELINE_COLLECTION_ID || steps.resources.outputs.baseline_collection_id }}
+          smoke-collection-id: ${{ vars.POSTMAN_SMOKE_COLLECTION_ID || steps.resources.outputs.smoke_collection_id }}
+          contract-collection-id: ${{ vars.POSTMAN_CONTRACT_COLLECTION_ID || steps.resources.outputs.contract_collection_id }}
+          monitor-id: ${{ vars.POSTMAN_MONITOR_ID }}
+          mock-url: ${{ vars.POSTMAN_MOCK_URL }}
+          collection-sync-mode: ${{ vars.POSTMAN_COLLECTION_SYNC_MODE || 'reuse' }}
+          spec-sync-mode: ${{ vars.POSTMAN_SPEC_SYNC_MODE || 'update' }}
+          spec-url: "https://127.0.0.1:8443/${{ steps.manifest.outputs.spec_path }}"
+          spec-path: ${{ steps.manifest.outputs.spec_path }}
+          environments-json: ${{ steps.manifest.outputs.environments_json }}
+          environment-uids-json: ${{ vars.POSTMAN_ENVIRONMENT_UIDS_JSON || steps.resources.outputs.environment_uids_json }}
+          env-runtime-urls-json: ${{ steps.manifest.outputs.runtime_urls_json }}
+          system-env-map-json: ${{ steps.system_envs.outputs.system_env_map_json }}
+          requester-email: ${{ vars.POSTMAN_REQUESTER_EMAIL || steps.manifest.outputs.requester_email }}
+          workspace-admin-user-ids: ${{ vars.POSTMAN_WORKSPACE_ADMIN_USER_IDS || steps.manifest.outputs.workspace_admin_user_ids }}
+          monitor-cron: ${{ vars.POSTMAN_MONITOR_CRON }}
+          generate-ci-workflow: 'false'
+          repo-write-mode: ${{ vars.POSTMAN_REPO_WRITE_MODE || 'commit-and-push' }}
+          current-ref: ${{ github.ref_name }}
+          postman-api-key: ${{ secrets.POSTMAN_API_KEY }}
+          postman-access-token: ${{ secrets.POSTMAN_ACCESS_TOKEN }}
+          postman-team-id: ${{ steps.system_envs.outputs.team_id || vars.POSTMAN_TEAM_ID || steps.manifest.outputs.postman_team_id }}
+          org-mode: ${{ vars.POSTMAN_ORG_MODE || steps.manifest.outputs.org_mode }}
+          integration-backend: ${{ vars.POSTMAN_INTEGRATION_BACKEND || steps.manifest.outputs.integration_backend }}
+          github-token: ${{ github.token }}
+          gh-fallback-token: ${{ secrets.GH_FALLBACK_TOKEN }}
+        env:
+          NODE_TLS_REJECT_UNAUTHORIZED: '0'
+          POSTMAN_WORKSPACE_TEAM_ID: ${{ vars.POSTMAN_WORKSPACE_TEAM_ID || steps.manifest.outputs.workspace_team_id }}
+
+      - name: Validate API Catalog onboarding via Bifrost
+        if: ${{ success() }}
+        env:
+          REQUIRE_API_CATALOG_LINK: ${{ vars.POSTMAN_REQUIRE_API_CATALOG_LINK || steps.manifest.outputs.require_api_catalog_link }}
+          REQUIRE_SYSTEM_ENV_ASSOCIATION: ${{ vars.POSTMAN_REQUIRE_SYSTEM_ENV_ASSOCIATION || steps.manifest.outputs.require_system_env_association }}
+          SYSTEM_ENV_MAP_JSON: ${{ steps.system_envs.outputs.system_env_map_json }}
+          REPO_SYNC_SUMMARY_JSON: ${{ steps.onboarding.outputs.repo-sync-summary-json }}
+          INTEGRATION_BACKEND: ${{ steps.onboarding.outputs.integration-backend }}
+        run: |
+          node <<'NODE'
+          function parseJson(name, rawValue, fallback) {
+            if (!rawValue) {
+              return fallback;
+            }
+
+            try {
+              return JSON.parse(rawValue);
+            } catch (error) {
+              throw new Error(`Invalid JSON in ${name}: ${error.message}`);
+            }
+          }
+
+          const requireApiCatalogLink = String(process.env.REQUIRE_API_CATALOG_LINK || 'true').toLowerCase() !== 'false';
+          const requireSystemEnvAssociation = String(process.env.REQUIRE_SYSTEM_ENV_ASSOCIATION || 'true').toLowerCase() !== 'false';
+          const integrationBackend = String(process.env.INTEGRATION_BACKEND || '').trim();
+
+          if (integrationBackend !== 'bifrost') {
+            throw new Error(
+              `Expected integration-backend to resolve to "bifrost", received "${integrationBackend || '<empty>'}".`
+            );
+          }
+
+          if (!requireApiCatalogLink && !requireSystemEnvAssociation) {
+            console.log('Bifrost validation disabled for this repo.');
+            process.exit(0);
+          }
+
+          const summary = parseJson(
+            'repo-sync-summary-json',
+            process.env.REPO_SYNC_SUMMARY_JSON,
+            {}
+          );
+          const systemEnvMap = parseJson(
+            'system_env_map_json',
+            process.env.SYSTEM_ENV_MAP_JSON,
+            {}
+          );
+
+          if (requireApiCatalogLink && summary.workspaceLinkStatus !== 'success') {
+            throw new Error(
+              `Workspace-to-repo Bifrost link did not succeed (workspaceLinkStatus=${summary.workspaceLinkStatus || '<empty>'}). ` +
+              'Ensure POSTMAN_ACCESS_TOKEN is configured and still valid.'
+            );
+          }
+
+          if (
+            requireSystemEnvAssociation &&
+            summary.environmentSyncStatus !== 'success'
+          ) {
+            const requestedSystemEnvs = Object.keys(systemEnvMap || {});
+            throw new Error(
+              `Environment association via Bifrost did not succeed (environmentSyncStatus=${summary.environmentSyncStatus || '<empty>'}, ` +
+              `systemEnvs=${requestedSystemEnvs.join(',') || '<none>'}).`
+            );
+          }
+          NODE
+
+      - name: Persist spec mapping in resources
+        if: ${{ success() && steps.onboarding.outputs.spec-id != '' }}
+        env:
+          RESOLVED_SPEC_ID: ${{ steps.onboarding.outputs.spec-id }}
+          RESOLVED_SPEC_PATH: ${{ steps.manifest.outputs.spec_path }}
+        run: |
+          ruby <<'RUBY'
+          require 'yaml'
+
+          resources_path = '.postman/resources.yaml'
+          data = File.exist?(resources_path) ? (YAML.load_file(resources_path) || {}) : {}
+
+          data['cloudResources'] ||= {}
+          data['cloudResources']['specs'] ||= {}
+
+          spec_key = "../#{ENV.fetch('RESOLVED_SPEC_PATH').sub(%r{^/+}, '')}"
+          spec_id = ENV.fetch('RESOLVED_SPEC_ID')
+
+          if data['cloudResources']['specs'][spec_key] != spec_id
+            data['cloudResources']['specs'][spec_key] = spec_id
+            File.write(resources_path, YAML.dump(data))
+          end
+          RUBY
+
+      - name: Persist reusable Postman ids in repo variables
+        if: ${{ success() }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_FALLBACK_TOKEN: ${{ secrets.GH_FALLBACK_TOKEN }}
+          RESOLVED_WORKSPACE_ID: ${{ steps.onboarding.outputs.workspace-id }}
+          RESOLVED_SPEC_ID: ${{ steps.onboarding.outputs.spec-id }}
+          RESOLVED_MONITOR_ID: ${{ steps.onboarding.outputs.monitor-id }}
+          RESOLVED_MOCK_URL: ${{ steps.onboarding.outputs.mock-url }}
+          RESOLVED_POSTMAN_TEAM_ID: ${{ steps.system_envs.outputs.team_id }}
+          RESOLVED_SYSTEM_ENV_MAP_JSON: ${{ steps.system_envs.outputs.system_env_map_json }}
+          RESOLVED_ENVIRONMENT_UIDS_JSON: ${{ steps.onboarding.outputs.environment-uids-json }}
+        run: |
+          if [ -n "${GH_FALLBACK_TOKEN:-}" ]; then
+            export GH_TOKEN="$GH_FALLBACK_TOKEN"
+          else
+            export GH_TOKEN="$GITHUB_TOKEN"
+          fi
+
+          ruby <<'RUBY'
+          require 'json'
+          require 'yaml'
+
+          manifest = JSON.parse(File.read('api-manifest.json'))
+          project_name = manifest['project_name'] || manifest['name'] || ''
+          resources_path = '.postman/resources.yaml'
+          data = File.exist?(resources_path) ? (YAML.load_file(resources_path) || {}) : {}
+          cloud = data['cloudResources'] || {}
+          collections = cloud['collections'] || {}
+
+          variable_map = {
+            'POSTMAN_WORKSPACE_ID' => ENV['RESOLVED_WORKSPACE_ID'],
+            'POSTMAN_SPEC_ID' => ENV['RESOLVED_SPEC_ID'],
+            'POSTMAN_BASELINE_COLLECTION_ID' => collections["../postman/collections/[Baseline] #{project_name}"],
+            'POSTMAN_SMOKE_COLLECTION_ID' => collections["../postman/collections/[Smoke] #{project_name}"],
+            'POSTMAN_CONTRACT_COLLECTION_ID' => collections["../postman/collections/[Contract] #{project_name}"],
+            'POSTMAN_MONITOR_ID' => ENV['RESOLVED_MONITOR_ID'],
+            'POSTMAN_MOCK_URL' => ENV['RESOLVED_MOCK_URL'],
+            'POSTMAN_TEAM_ID' => ENV['RESOLVED_POSTMAN_TEAM_ID'],
+            'POSTMAN_SYSTEM_ENV_MAP_JSON' => ENV['RESOLVED_SYSTEM_ENV_MAP_JSON'],
+            'POSTMAN_ENVIRONMENT_UIDS_JSON' => ENV['RESOLVED_ENVIRONMENT_UIDS_JSON']
+          }
+
+          variable_map.each do |name, value|
+            next if value.to_s.empty?
+
+            success = system(
+              'gh',
+              'variable',
+              'set',
+              name,
+              '--repo',
+              ENV.fetch('GITHUB_REPOSITORY'),
+              '--body',
+              value
+            )
+            raise "Failed to set #{name}" unless success
+          end
+          RUBY
+
+      - name: Push spec mapping update
+        if: ${{ success() }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_FALLBACK_TOKEN: ${{ secrets.GH_FALLBACK_TOKEN }}
+        run: |
+          if git diff --quiet -- .postman/resources.yaml; then
+            exit 0
+          fi
+
+          if [ -n "${GH_FALLBACK_TOKEN:-}" ]; then
+            PUSH_TOKEN="$GH_FALLBACK_TOKEN"
+          else
+            PUSH_TOKEN="$GITHUB_TOKEN"
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .postman/resources.yaml
+          git commit -m "chore: persist Postman spec mapping"
+          git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Stop local spec host
+        if: always()
+        run: |
+          if [ -f .tmp/spec-host/server.pid ]; then
+            kill "$(cat .tmp/spec-host/server.pid)" >/dev/null 2>&1 || true
+          fi

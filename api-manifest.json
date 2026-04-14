@@ -1,0 +1,48 @@
+{
+  "name": "payments-api",
+  "project_name": "GrubHub Payments API",
+  "domain": "grubhub-platform",
+  "domain_code": "GH",
+  "spec_path": "specs/grubhub-payments-api.yaml",
+  "source": {
+    "type": "specification",
+    "workspace_id": "b498c773-f575-4e4f-995f-cdd10990188e",
+    "api_id": "",
+    "spec_id": "1cc9d1e8-ad6e-4eb4-849a-5e32beb33078",
+    "schema_id": "",
+    "schema_file_path": "",
+    "spec_file_path": "grubhub-payments-api.yaml"
+  },
+  "github": {
+    "owner": "shivemind",
+    "repo": "grubhub-payments-api"
+  },
+  "environments": [
+    "dev",
+    "prod"
+  ],
+  "runtime_urls": {
+    "dev": "http://localhost:3001/api/v1",
+    "prod": "https://api.grubhub.example/payments/v1"
+  },
+  "environment_values": {},
+  "postman": {
+    "workspace_id": "b498c773-f575-4e4f-995f-cdd10990188e",
+    "workspace_name": "[GH] GrubHub Payments API",
+    "spec_name": "GrubHub Payments API",
+    "collection_name": "GrubHub Payments API",
+    "smoke_collection_name": "GrubHub Payments API Smoke",
+    "environment_name_prefix": "GrubHub Payments API",
+    "monitor_name": "GrubHub Payments API Smoke Monitor",
+    "governance_mapping": {},
+    "system_env_map": {},
+    "requester_email": "",
+    "workspace_admin_user_ids": "",
+    "team_id": "14643263",
+    "workspace_team_id": "",
+    "org_mode": false,
+    "require_api_catalog_link": true,
+    "require_system_env_association": true,
+    "integration_backend": "bifrost"
+  }
+}

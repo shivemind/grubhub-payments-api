@@ -1,0 +1,7 @@
+# Workspace id is optional. The onboarding workflow will reuse or create it by name.
+workspace:
+  id: b498c773-f575-4e4f-995f-cdd10990188e
+
+localResources:
+  specs:
+    - ../specs/grubhub-payments-api.yaml
