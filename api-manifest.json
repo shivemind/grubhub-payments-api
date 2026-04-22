@@ -5,12 +5,12 @@
   "domain_code": "GH",
   "spec_path": "specs/grubhub-payments-api.yaml",
   "source": {
-    "type": "specification",
-    "workspace_id": "b498c773-f575-4e4f-995f-cdd10990188e",
+    "type": "local",
+    "workspace_id": "",
     "api_id": "",
-    "spec_id": "1cc9d1e8-ad6e-4eb4-849a-5e32beb33078",
+    "spec_id": "",
     "schema_id": "",
-    "schema_file_path": "",
+    "schema_file_path": "grubhub-payments-api.yaml",
     "spec_file_path": "grubhub-payments-api.yaml"
   },
   "github": {
@@ -27,7 +27,7 @@
   },
   "environment_values": {},
   "postman": {
-    "workspace_id": "b498c773-f575-4e4f-995f-cdd10990188e",
+    "workspace_id": "",
     "workspace_name": "[GH] GrubHub Payments API",
     "spec_name": "GrubHub Payments API",
     "collection_name": "GrubHub Payments API",
@@ -38,11 +38,11 @@
     "system_env_map": {},
     "requester_email": "",
     "workspace_admin_user_ids": "",
-    "team_id": "14643263",
+    "team_id": "13569807",
     "workspace_team_id": "",
     "org_mode": false,
-    "require_api_catalog_link": true,
-    "require_system_env_association": true,
+    "require_api_catalog_link": false,
+    "require_system_env_association": false,
     "integration_backend": "bifrost"
   }
 }

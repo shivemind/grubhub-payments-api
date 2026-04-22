@@ -10,8 +10,12 @@ info:
     email: api-platform@grubhub.com
 
 servers:
+  - url: https://api.grubhub.com/payments/v1
+    description: Production
+  - url: https://staging-api.grubhub.com/payments/v1
+    description: Staging
   - url: http://localhost:3001/api/v1
-    description: Local development server
+    description: Local development
 
 security:
   - ApiKeyAuth: []
@@ -23,6 +27,8 @@ tags:
     description: Refund lifecycle management
   - name: Invoices
     description: Invoice generation and retrieval
+  - name: Health
+    description: Service health monitoring
 
 paths:
   /payments:

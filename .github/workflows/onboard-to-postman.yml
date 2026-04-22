@@ -465,6 +465,49 @@ jobs:
           git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push origin HEAD:${{ github.ref_name }}
 
+      - name: Install Postman CLI
+        if: ${{ success() }}
+        run: curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+
+      - name: Governance lint (Postman CLI)
+        if: ${{ success() }}
+        continue-on-error: true
+        env:
+          POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+          SPEC_PATH: ${{ steps.manifest.outputs.spec_path }}
+        run: postman api lint "$SPEC_PATH"
+
+      - name: Resolve smoke collection and environment for CLI test run
+        id: post_resources
+        if: ${{ success() }}
+        run: |
+          ruby <<'RUBY'
+          require 'yaml'
+          require 'json'
+          data = File.exist?('.postman/resources.yaml') ? (YAML.load_file('.postman/resources.yaml') || {}) : {}
+          cloud = data['cloudResources'] || {}
+          collections = cloud['collections'] || {}
+          environments = cloud['environments'] || {}
+          manifest = JSON.parse(File.read('api-manifest.json'))
+          project = manifest['project_name'] || manifest['name'] || ''
+          smoke_id = collections["../postman/collections/[Smoke] #{project}"].to_s
+          env_uid = environments.values.compact.first.to_s
+          File.open(ENV.fetch('GITHUB_OUTPUT'), 'a') do |f|
+            f.puts "smoke_collection_id=#{smoke_id}"
+            f.puts "environment_uid=#{env_uid}"
+          end
+          RUBY
+
+      - name: Run smoke collection (Postman CLI)
+        if: ${{ success() && steps.post_resources.outputs.smoke_collection_id != '' && steps.post_resources.outputs.environment_uid != '' }}
+        continue-on-error: true
+        env:
+          POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+        run: |
+          postman collection run "${{ steps.post_resources.outputs.smoke_collection_id }}" \
+            --environment "${{ steps.post_resources.outputs.environment_uid }}" \
+            --bail
+
       - name: Stop local spec host
         if: always()
         run: |
