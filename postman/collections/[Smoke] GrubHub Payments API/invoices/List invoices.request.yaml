@@ -1,0 +1,70 @@
+type: http
+name: List invoices
+url: '{{baseUrl}}/invoices?restaurantId=string&startDate=2007-08-31&endDate=2007-08-31'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+queryParams:
+  - key: restaurantId
+    value: string
+  - key: startDate
+    value: '2007-08-31'
+  - key: endDate
+    value: '2007-08-31'
+scripts:
+  - type: afterResponse
+    code:
+      - // [Smoke] Auto-generated test assertions
+      - pm.test('Status code is successful (2xx)', function () {
+      - '    pm.response.to.be.success;'
+      - '});'
+      - pm.test('Response time is acceptable', function () {
+      - '    var threshold = parseInt(pm.environment.get(''RESPONSE_TIME_THRESHOLD'') || ''2000'', 10);'
+      - '    pm.expect(pm.response.responseTime).to.be.below(threshold);'
+      - '});'
+      - pm.test('Response body is not empty', function () {
+      - '    if (pm.response.code !== 204) {'
+      - '        var body = pm.response.text();'
+      - '        pm.expect(body.length).to.be.above(0);'
+      - '    }'
+      - '});'
+    language: text/javascript
+examples:
+  - response:
+      statusCode: 200
+      statusText: OK
+      body:
+        type: json
+        content: |-
+          {
+            "invoices": [
+              {
+                "id": "string",
+                "restaurantId": "string",
+                "periodStart": "1956-11-14",
+                "periodEnd": "1982-02-15",
+                "totalAmount": 7655.666306401991,
+                "commissionAmount": 3701.36746659498,
+                "netAmount": 9473.831932686799,
+                "status": "draft",
+                "createdAt": "1999-09-05T10:53:49.964Z"
+              },
+              {
+                "id": "string",
+                "restaurantId": "string",
+                "periodStart": "1954-04-18",
+                "periodEnd": "1976-10-12",
+                "totalAmount": 4818.467987560469,
+                "commissionAmount": 4674.477974611924,
+                "netAmount": 8615.210669760543,
+                "status": "issued",
+                "createdAt": "1972-10-14T20:51:27.935Z"
+              }
+            ],
+            "total": 3246
+          }
+      headers:
+        - key: Content-Type
+          value: application/json
+    name: List of invoices

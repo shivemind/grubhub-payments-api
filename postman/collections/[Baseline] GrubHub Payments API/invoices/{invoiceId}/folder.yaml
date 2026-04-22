@@ -1,0 +1,4 @@
+type: folder
+name: '{invoiceId}'
+items:
+  - ref: ./Get invoice details.request.yaml

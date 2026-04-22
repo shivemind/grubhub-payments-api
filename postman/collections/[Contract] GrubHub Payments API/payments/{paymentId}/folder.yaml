@@ -1,0 +1,4 @@
+type: folder
+name: '{paymentId}'
+items:
+  - ref: ./Get payment details.request.yaml

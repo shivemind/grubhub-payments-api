@@ -1,0 +1,50 @@
+type: http
+name: List payments
+url: '{{baseUrl}}/payments?orderId=string&status=failed&limit=20'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+queryParams:
+  - key: orderId
+    value: string
+  - key: status
+    value: failed
+  - key: limit
+    value: '20'
+examples:
+  - response:
+      statusCode: 200
+      statusText: OK
+      body:
+        type: json
+        content: |-
+          {
+            "payments": [
+              {
+                "id": "string",
+                "orderId": "string",
+                "amount": 9034.795130430499,
+                "currency": "USD",
+                "status": "completed",
+                "method": "google_pay",
+                "createdAt": "1948-07-29T06:04:52.657Z",
+                "completedAt": "2023-05-18T00:14:47.512Z"
+              },
+              {
+                "id": "string",
+                "orderId": "string",
+                "amount": 5356.03526180759,
+                "currency": "USD",
+                "status": "completed",
+                "method": "google_pay",
+                "createdAt": "2021-12-22T18:52:35.255Z",
+                "completedAt": "2005-04-18T05:09:53.524Z"
+              }
+            ],
+            "total": 7442
+          }
+      headers:
+        - key: Content-Type
+          value: application/json
+    name: List of payments

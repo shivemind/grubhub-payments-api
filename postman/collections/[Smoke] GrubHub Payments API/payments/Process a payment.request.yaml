@@ -1,0 +1,57 @@
+type: http
+name: Process a payment
+url: '{{baseUrl}}/payments'
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "orderId": "string",
+      "amount": 6344.579678391185,
+      "method": "debit_card",
+      "token": "string"
+    }
+scripts:
+  - type: afterResponse
+    code:
+      - // [Smoke] Auto-generated test assertions
+      - pm.test('Status code is successful (2xx)', function () {
+      - '    pm.response.to.be.success;'
+      - '});'
+      - pm.test('Response time is acceptable', function () {
+      - '    var threshold = parseInt(pm.environment.get(''RESPONSE_TIME_THRESHOLD'') || ''2000'', 10);'
+      - '    pm.expect(pm.response.responseTime).to.be.below(threshold);'
+      - '});'
+      - pm.test('Response body is not empty', function () {
+      - '    if (pm.response.code !== 204) {'
+      - '        var body = pm.response.text();'
+      - '        pm.expect(body.length).to.be.above(0);'
+      - '    }'
+      - '});'
+    language: text/javascript
+examples:
+  - response:
+      statusCode: 201
+      statusText: Created
+      body:
+        type: json
+        content: |-
+          {
+            "id": "string",
+            "orderId": "string",
+            "amount": 5374.928719297205,
+            "currency": "USD",
+            "status": "completed",
+            "method": "apple_pay",
+            "createdAt": "1968-07-01T17:38:24.293Z",
+            "completedAt": "1973-05-15T13:44:38.545Z"
+          }
+      headers:
+        - key: Content-Type
+          value: application/json
+    name: Payment processed

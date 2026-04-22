@@ -1,0 +1,32 @@
+type: http
+name: Get invoice details
+url: '{{baseUrl}}/invoices/:invoiceId'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+pathVariables:
+  - key: invoiceId
+    value: string
+examples:
+  - response:
+      statusCode: 200
+      statusText: OK
+      body:
+        type: json
+        content: |-
+          {
+            "id": "string",
+            "restaurantId": "string",
+            "periodStart": "1981-08-22",
+            "periodEnd": "2017-03-13",
+            "totalAmount": 6454.847530363346,
+            "commissionAmount": 8333.115932713068,
+            "netAmount": 9636.668356762042,
+            "status": "paid",
+            "createdAt": "1979-12-15T16:08:48.091Z"
+          }
+      headers:
+        - key: Content-Type
+          value: application/json
+    name: Invoice details

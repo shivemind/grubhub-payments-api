@@ -1,0 +1,5 @@
+type: folder
+name: invoices
+items:
+  - ref: ./{invoiceId}/folder.yaml
+  - ref: ./List invoices.request.yaml

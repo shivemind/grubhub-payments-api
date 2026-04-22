@@ -1,0 +1,68 @@
+type: http
+name: List payments
+url: '{{baseUrl}}/payments?orderId=string&status=pending&limit=20'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+queryParams:
+  - key: orderId
+    value: string
+  - key: status
+    value: pending
+  - key: limit
+    value: '20'
+scripts:
+  - type: afterResponse
+    code:
+      - // [Smoke] Auto-generated test assertions
+      - pm.test('Status code is successful (2xx)', function () {
+      - '    pm.response.to.be.success;'
+      - '});'
+      - pm.test('Response time is acceptable', function () {
+      - '    var threshold = parseInt(pm.environment.get(''RESPONSE_TIME_THRESHOLD'') || ''2000'', 10);'
+      - '    pm.expect(pm.response.responseTime).to.be.below(threshold);'
+      - '});'
+      - pm.test('Response body is not empty', function () {
+      - '    if (pm.response.code !== 204) {'
+      - '        var body = pm.response.text();'
+      - '        pm.expect(body.length).to.be.above(0);'
+      - '    }'
+      - '});'
+    language: text/javascript
+examples:
+  - response:
+      statusCode: 200
+      statusText: OK
+      body:
+        type: json
+        content: |-
+          {
+            "payments": [
+              {
+                "id": "string",
+                "orderId": "string",
+                "amount": 7198.174131460469,
+                "currency": "USD",
+                "status": "pending",
+                "method": "apple_pay",
+                "createdAt": "2015-12-03T23:16:07.436Z",
+                "completedAt": "1990-07-02T00:34:31.852Z"
+              },
+              {
+                "id": "string",
+                "orderId": "string",
+                "amount": 3235.6326561748715,
+                "currency": "USD",
+                "status": "pending",
+                "method": "debit_card",
+                "createdAt": "1952-06-15T07:06:27.495Z",
+                "completedAt": "2019-09-28T03:11:05.180Z"
+              }
+            ],
+            "total": 817
+          }
+      headers:
+        - key: Content-Type
+          value: application/json
+    name: List of payments

@@ -1,0 +1,29 @@
+type: http
+name: Get refund status
+url: '{{baseUrl}}/refunds/:refundId'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+pathVariables:
+  - key: refundId
+    value: string
+examples:
+  - response:
+      statusCode: 200
+      statusText: OK
+      body:
+        type: json
+        content: |-
+          {
+            "id": "string",
+            "paymentId": "string",
+            "amount": 5692.264025737064,
+            "reason": "string",
+            "status": "pending",
+            "createdAt": "1951-03-06T17:51:22.402Z"
+          }
+      headers:
+        - key: Content-Type
+          value: application/json
+    name: Refund details

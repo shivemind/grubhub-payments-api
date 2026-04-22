@@ -1,0 +1,36 @@
+type: http
+name: Create a refund
+url: '{{baseUrl}}/refunds'
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "paymentId": "string",
+      "amount": 6163.108581072869,
+      "reason": "string"
+    }
+examples:
+  - response:
+      statusCode: 201
+      statusText: Created
+      body:
+        type: json
+        content: |-
+          {
+            "id": "string",
+            "paymentId": "string",
+            "amount": 5692.264025737064,
+            "reason": "string",
+            "status": "pending",
+            "createdAt": "1951-03-06T17:51:22.402Z"
+          }
+      headers:
+        - key: Content-Type
+          value: application/json
+    name: Refund created

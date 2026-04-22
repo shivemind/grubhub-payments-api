@@ -1,0 +1,50 @@
+type: http
+name: Get invoice details
+url: '{{baseUrl}}/invoices/:invoiceId'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+pathVariables:
+  - key: invoiceId
+    value: string
+scripts:
+  - type: afterResponse
+    code:
+      - // [Smoke] Auto-generated test assertions
+      - pm.test('Status code is successful (2xx)', function () {
+      - '    pm.response.to.be.success;'
+      - '});'
+      - pm.test('Response time is acceptable', function () {
+      - '    var threshold = parseInt(pm.environment.get(''RESPONSE_TIME_THRESHOLD'') || ''2000'', 10);'
+      - '    pm.expect(pm.response.responseTime).to.be.below(threshold);'
+      - '});'
+      - pm.test('Response body is not empty', function () {
+      - '    if (pm.response.code !== 204) {'
+      - '        var body = pm.response.text();'
+      - '        pm.expect(body.length).to.be.above(0);'
+      - '    }'
+      - '});'
+    language: text/javascript
+examples:
+  - response:
+      statusCode: 200
+      statusText: OK
+      body:
+        type: json
+        content: |-
+          {
+            "id": "string",
+            "restaurantId": "string",
+            "periodStart": "2020-07-01",
+            "periodEnd": "2025-08-14",
+            "totalAmount": 5504.9750848270305,
+            "commissionAmount": 3007.8473943596773,
+            "netAmount": 2004.484970534486,
+            "status": "paid",
+            "createdAt": "1989-02-08T08:35:17.094Z"
+          }
+      headers:
+        - key: Content-Type
+          value: application/json
+    name: Invoice details

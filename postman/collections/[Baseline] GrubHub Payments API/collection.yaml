@@ -1,0 +1,32 @@
+$schema: https://schema.postman.com/json/draft-2020-12/collection/v3.0.0/
+type: collection
+name: '[Baseline] GrubHub Payments API'
+description: |-
+  REST API for processing payments, managing refunds, and handling
+  billing for orders on the GrubHub platform.
+
+
+  Contact Support:
+   Name: GrubHub API Platform Team
+   Email: api-platform@grubhub.com
+id: 9857c92c-3e74-487d-a6d2-bb23e5257804
+auth:
+  type: apikey
+  credentials:
+    - key: key
+      value: X-API-Key
+      type: string
+    - key: value
+      value: '{{apiKey}}'
+      type: string
+    - key: in
+      value: header
+      type: string
+variables:
+  - key: baseUrl
+    value: https://api.grubhub.com/payments/v1
+items:
+  - ref: ./payments/folder.yaml
+  - ref: ./refunds/folder.yaml
+  - ref: ./invoices/folder.yaml
+  - ref: ./health/folder.yaml

@@ -1,0 +1,8 @@
+workflows:
+  syncSpecToCollection:
+    - spec: ../specs/grubhub-payments-api.yaml
+      collection: ../postman/collections/[Baseline] GrubHub Payments API
+    - spec: ../specs/grubhub-payments-api.yaml
+      collection: ../postman/collections/[Smoke] GrubHub Payments API
+    - spec: ../specs/grubhub-payments-api.yaml
+      collection: ../postman/collections/[Contract] GrubHub Payments API
