@@ -1,20 +1,23 @@
+---
 workspace:
   id: a7da14ca-d31f-4ac1-bace-e75162ae5f1b
 localResources:
   collections:
-    - ../postman/collections/[Baseline] GrubHub Payments API
-    - ../postman/collections/[Smoke] GrubHub Payments API
-    - ../postman/collections/[Contract] GrubHub Payments API
+  - "../postman/collections/[Baseline] GrubHub Payments API"
+  - "../postman/collections/[Smoke] GrubHub Payments API"
+  - "../postman/collections/[Contract] GrubHub Payments API"
   environments:
-    - ../postman/environments/dev.postman_environment.json
-    - ../postman/environments/prod.postman_environment.json
+  - "../postman/environments/dev.postman_environment.json"
+  - "../postman/environments/prod.postman_environment.json"
   specs:
-    - ../specs/grubhub-payments-api.yaml
+  - "../specs/grubhub-payments-api.yaml"
 cloudResources:
   collections:
-    ../postman/collections/[Baseline] GrubHub Payments API: 52400725-9857c92c-3e74-487d-a6d2-bb23e5257804
-    ../postman/collections/[Smoke] GrubHub Payments API: 52400725-84a9cd7e-b55d-4eab-ab81-7cfa6a93eef6
-    ../postman/collections/[Contract] GrubHub Payments API: 52400725-1eb7a371-3e22-4b34-bf14-52d87c85df55
+    "../postman/collections/[Baseline] GrubHub Payments API": 52400725-9857c92c-3e74-487d-a6d2-bb23e5257804
+    "../postman/collections/[Smoke] GrubHub Payments API": 52400725-84a9cd7e-b55d-4eab-ab81-7cfa6a93eef6
+    "../postman/collections/[Contract] GrubHub Payments API": 52400725-1eb7a371-3e22-4b34-bf14-52d87c85df55
   environments:
-    ../postman/environments/dev.postman_environment.json: 52400725-4c35c340-db9e-417c-8eb5-aea810611070
-    ../postman/environments/prod.postman_environment.json: 52400725-425f04cc-b5d5-4bcb-8d65-e0ee13c2049e
+    "../postman/environments/dev.postman_environment.json": 52400725-4c35c340-db9e-417c-8eb5-aea810611070
+    "../postman/environments/prod.postman_environment.json": 52400725-425f04cc-b5d5-4bcb-8d65-e0ee13c2049e
+  specs:
+    "../specs/grubhub-payments-api.yaml": 841038f0-6739-4fee-8d7a-b90a9d53d6b6
