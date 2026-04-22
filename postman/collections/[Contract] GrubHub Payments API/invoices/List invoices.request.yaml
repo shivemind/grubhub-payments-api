@@ -1,6 +1,6 @@
 type: http
 name: List invoices
-url: '{{baseUrl}}/invoices?restaurantId=string&startDate=1997-12-17&endDate=1997-12-17'
+url: '{{baseUrl}}/invoices?restaurantId=string&startDate=1951-12-23&endDate=1951-12-23'
 method: GET
 headers:
   - key: Accept
@@ -9,9 +9,9 @@ queryParams:
   - key: restaurantId
     value: string
   - key: startDate
-    value: '1997-12-17'
+    value: '1951-12-23'
   - key: endDate
-    value: '1997-12-17'
+    value: '1951-12-23'
 scripts:
   - type: afterResponse
     code:
@@ -85,27 +85,27 @@ examples:
               {
                 "id": "string",
                 "restaurantId": "string",
-                "periodStart": "1995-04-23",
-                "periodEnd": "1978-05-09",
-                "totalAmount": 3757.080393259031,
-                "commissionAmount": 2040.5565880783793,
-                "netAmount": 8557.571315764388,
+                "periodStart": "1956-04-14",
+                "periodEnd": "1992-03-25",
+                "totalAmount": 8784.301819649958,
+                "commissionAmount": 302.2683040611396,
+                "netAmount": 6689.999494348693,
                 "status": "issued",
-                "createdAt": "2008-03-03T17:12:46.545Z"
+                "createdAt": "2003-09-02T11:45:28.645Z"
               },
               {
                 "id": "string",
                 "restaurantId": "string",
-                "periodStart": "2013-10-26",
-                "periodEnd": "1980-11-24",
-                "totalAmount": 3245.2654502928735,
-                "commissionAmount": 1909.998913334774,
-                "netAmount": 5665.1908062171415,
-                "status": "paid",
-                "createdAt": "2015-12-04T12:29:45.529Z"
+                "periodStart": "1951-06-12",
+                "periodEnd": "1997-02-06",
+                "totalAmount": 3153.999856387517,
+                "commissionAmount": 3244.004585892468,
+                "netAmount": 732.6451316643023,
+                "status": "issued",
+                "createdAt": "1974-11-26T23:44:11.357Z"
               }
             ],
-            "total": 4336
+            "total": 5535
           }
       headers:
         - key: Content-Type

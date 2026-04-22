@@ -1,6 +1,6 @@
 type: http
 name: List payments
-url: '{{baseUrl}}/payments?orderId=string&status=pending&limit=20'
+url: '{{baseUrl}}/payments?orderId=string&status=completed&limit=20'
 method: GET
 headers:
   - key: Accept
@@ -9,7 +9,7 @@ queryParams:
   - key: orderId
     value: string
   - key: status
-    value: pending
+    value: completed
   - key: limit
     value: '20'
 scripts:
@@ -42,25 +42,25 @@ examples:
               {
                 "id": "string",
                 "orderId": "string",
-                "amount": 7198.174131460469,
+                "amount": 2601.683885997994,
                 "currency": "USD",
-                "status": "pending",
-                "method": "apple_pay",
-                "createdAt": "2015-12-03T23:16:07.436Z",
-                "completedAt": "1990-07-02T00:34:31.852Z"
+                "status": "failed",
+                "method": "debit_card",
+                "createdAt": "1960-05-11T04:29:28.664Z",
+                "completedAt": "1972-11-02T14:59:59.695Z"
               },
               {
                 "id": "string",
                 "orderId": "string",
-                "amount": 3235.6326561748715,
+                "amount": 6913.0663715626215,
                 "currency": "USD",
                 "status": "pending",
-                "method": "debit_card",
-                "createdAt": "1952-06-15T07:06:27.495Z",
-                "completedAt": "2019-09-28T03:11:05.180Z"
+                "method": "google_pay",
+                "createdAt": "2010-04-07T21:48:52.546Z",
+                "completedAt": "1981-12-30T17:05:43.602Z"
               }
             ],
-            "total": 817
+            "total": 8366
           }
       headers:
         - key: Content-Type

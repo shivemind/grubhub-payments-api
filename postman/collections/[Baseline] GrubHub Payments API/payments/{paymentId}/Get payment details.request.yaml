@@ -18,12 +18,12 @@ examples:
           {
             "id": "string",
             "orderId": "string",
-            "amount": 8850.637147778452,
+            "amount": 9526.231719354802,
             "currency": "USD",
-            "status": "completed",
-            "method": "google_pay",
-            "createdAt": "2023-05-15T17:30:20.765Z",
-            "completedAt": "2008-06-06T14:38:34.065Z"
+            "status": "pending",
+            "method": "apple_pay",
+            "createdAt": "2019-03-22T15:19:10.695Z",
+            "completedAt": "2024-09-04T12:25:38.237Z"
           }
       headers:
         - key: Content-Type

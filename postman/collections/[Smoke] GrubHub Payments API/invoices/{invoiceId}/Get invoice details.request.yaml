@@ -36,13 +36,13 @@ examples:
           {
             "id": "string",
             "restaurantId": "string",
-            "periodStart": "2020-07-01",
-            "periodEnd": "2025-08-14",
-            "totalAmount": 5504.9750848270305,
-            "commissionAmount": 3007.8473943596773,
-            "netAmount": 2004.484970534486,
-            "status": "paid",
-            "createdAt": "1989-02-08T08:35:17.094Z"
+            "periodStart": "1960-04-23",
+            "periodEnd": "1994-11-14",
+            "totalAmount": 8233.446646029302,
+            "commissionAmount": 4939.80490644387,
+            "netAmount": 3215.7106081872366,
+            "status": "issued",
+            "createdAt": "1984-05-25T04:25:05.577Z"
           }
       headers:
         - key: Content-Type

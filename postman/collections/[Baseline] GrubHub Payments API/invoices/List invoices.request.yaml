@@ -1,6 +1,6 @@
 type: http
 name: List invoices
-url: '{{baseUrl}}/invoices?restaurantId=string&startDate=1964-08-15&endDate=1964-08-15'
+url: '{{baseUrl}}/invoices?restaurantId=string&startDate=1985-03-29&endDate=1985-03-29'
 method: GET
 headers:
   - key: Accept
@@ -9,9 +9,9 @@ queryParams:
   - key: restaurantId
     value: string
   - key: startDate
-    value: '1964-08-15'
+    value: '1985-03-29'
   - key: endDate
-    value: '1964-08-15'
+    value: '1985-03-29'
 examples:
   - response:
       statusCode: 200
@@ -24,27 +24,27 @@ examples:
               {
                 "id": "string",
                 "restaurantId": "string",
-                "periodStart": "1997-09-04",
-                "periodEnd": "1953-05-15",
-                "totalAmount": 1753.3570339795258,
-                "commissionAmount": 8516.266044021615,
-                "netAmount": 1476.2842660524766,
-                "status": "paid",
-                "createdAt": "2003-05-11T20:38:16.855Z"
+                "periodStart": "2000-03-25",
+                "periodEnd": "2025-04-30",
+                "totalAmount": 8994.9318308714,
+                "commissionAmount": 8582.289372342717,
+                "netAmount": 8541.144959800731,
+                "status": "draft",
+                "createdAt": "1970-01-08T03:19:28.513Z"
               },
               {
                 "id": "string",
                 "restaurantId": "string",
-                "periodStart": "1998-02-26",
-                "periodEnd": "2018-01-29",
-                "totalAmount": 8021.562858950242,
-                "commissionAmount": 1361.3716936967623,
-                "netAmount": 4720.650087120984,
-                "status": "draft",
-                "createdAt": "1965-07-13T04:36:38.438Z"
+                "periodStart": "1965-06-22",
+                "periodEnd": "1978-05-14",
+                "totalAmount": 3166.254858666526,
+                "commissionAmount": 560.4322830271747,
+                "netAmount": 7084.283231624984,
+                "status": "issued",
+                "createdAt": "1999-05-25T17:05:19.330Z"
               }
             ],
-            "total": 8828
+            "total": 3607
           }
       headers:
         - key: Content-Type

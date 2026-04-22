@@ -24,25 +24,25 @@ examples:
               {
                 "id": "string",
                 "orderId": "string",
-                "amount": 9034.795130430499,
+                "amount": 238.09490423090108,
                 "currency": "USD",
-                "status": "completed",
-                "method": "google_pay",
-                "createdAt": "1948-07-29T06:04:52.657Z",
-                "completedAt": "2023-05-18T00:14:47.512Z"
+                "status": "refunded",
+                "method": "debit_card",
+                "createdAt": "1977-11-14T05:06:45.442Z",
+                "completedAt": "2010-03-22T19:04:47.548Z"
               },
               {
                 "id": "string",
                 "orderId": "string",
-                "amount": 5356.03526180759,
+                "amount": 3958.1209271721195,
                 "currency": "USD",
                 "status": "completed",
                 "method": "google_pay",
-                "createdAt": "2021-12-22T18:52:35.255Z",
-                "completedAt": "2005-04-18T05:09:53.524Z"
+                "createdAt": "1986-06-28T07:01:20.537Z",
+                "completedAt": "1980-10-19T14:48:16.427Z"
               }
             ],
-            "total": 7442
+            "total": 6670
           }
       headers:
         - key: Content-Type

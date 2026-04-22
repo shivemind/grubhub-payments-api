@@ -25,6 +25,7 @@ auth:
 variables:
   - key: baseUrl
     value: https://api.grubhub.com/payments/v1
+    type: any
 items:
   - ref: ./payments/folder.yaml
   - ref: ./refunds/folder.yaml

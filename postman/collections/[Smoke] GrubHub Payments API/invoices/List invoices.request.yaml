@@ -1,6 +1,6 @@
 type: http
 name: List invoices
-url: '{{baseUrl}}/invoices?restaurantId=string&startDate=2007-08-31&endDate=2007-08-31'
+url: '{{baseUrl}}/invoices?restaurantId=string&startDate=1976-10-22&endDate=1976-10-22'
 method: GET
 headers:
   - key: Accept
@@ -9,9 +9,9 @@ queryParams:
   - key: restaurantId
     value: string
   - key: startDate
-    value: '2007-08-31'
+    value: '1976-10-22'
   - key: endDate
-    value: '2007-08-31'
+    value: '1976-10-22'
 scripts:
   - type: afterResponse
     code:
@@ -42,27 +42,27 @@ examples:
               {
                 "id": "string",
                 "restaurantId": "string",
-                "periodStart": "1956-11-14",
-                "periodEnd": "1982-02-15",
-                "totalAmount": 7655.666306401991,
-                "commissionAmount": 3701.36746659498,
-                "netAmount": 9473.831932686799,
-                "status": "draft",
-                "createdAt": "1999-09-05T10:53:49.964Z"
+                "periodStart": "1984-04-23",
+                "periodEnd": "1974-08-02",
+                "totalAmount": 394.7506736961914,
+                "commissionAmount": 3412.8498922438143,
+                "netAmount": 157.18028283834508,
+                "status": "paid",
+                "createdAt": "2004-10-09T14:23:54.200Z"
               },
               {
                 "id": "string",
                 "restaurantId": "string",
-                "periodStart": "1954-04-18",
-                "periodEnd": "1976-10-12",
-                "totalAmount": 4818.467987560469,
-                "commissionAmount": 4674.477974611924,
-                "netAmount": 8615.210669760543,
-                "status": "issued",
-                "createdAt": "1972-10-14T20:51:27.935Z"
+                "periodStart": "2013-04-02",
+                "periodEnd": "1991-02-09",
+                "totalAmount": 6618.9377715720975,
+                "commissionAmount": 6244.858315496951,
+                "netAmount": 3740.2186253557024,
+                "status": "paid",
+                "createdAt": "2012-06-25T20:31:01.646Z"
               }
             ],
-            "total": 3246
+            "total": 5329
           }
       headers:
         - key: Content-Type

@@ -79,10 +79,10 @@ examples:
           {
             "id": "string",
             "paymentId": "string",
-            "amount": 9546.785169256253,
+            "amount": 7790.443413626531,
             "reason": "string",
-            "status": "pending",
-            "createdAt": "1982-10-14T17:01:20.795Z"
+            "status": "approved",
+            "createdAt": "2021-12-03T02:45:41.395Z"
           }
       headers:
         - key: Content-Type

@@ -12,8 +12,8 @@ body:
   content: |-
     {
       "orderId": "string",
-      "amount": 5646.6899471050765,
-      "method": "google_pay",
+      "amount": 976.6282086357836,
+      "method": "debit_card",
       "token": "string"
     }
 scripts:
@@ -87,12 +87,12 @@ examples:
           {
             "id": "string",
             "orderId": "string",
-            "amount": 6837.485193210014,
+            "amount": 5630.574618146371,
             "currency": "USD",
-            "status": "completed",
-            "method": "debit_card",
-            "createdAt": "1976-04-20T01:45:48.438Z",
-            "completedAt": "2016-11-18T21:52:15.119Z"
+            "status": "failed",
+            "method": "apple_pay",
+            "createdAt": "2021-09-13T23:57:49.173Z",
+            "completedAt": "1969-04-09T15:39:17.679Z"
           }
       headers:
         - key: Content-Type

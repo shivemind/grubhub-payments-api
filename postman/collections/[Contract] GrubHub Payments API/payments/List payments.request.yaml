@@ -1,6 +1,6 @@
 type: http
 name: List payments
-url: '{{baseUrl}}/payments?orderId=string&status=completed&limit=20'
+url: '{{baseUrl}}/payments?orderId=string&status=pending&limit=20'
 method: GET
 headers:
   - key: Accept
@@ -9,7 +9,7 @@ queryParams:
   - key: orderId
     value: string
   - key: status
-    value: completed
+    value: pending
   - key: limit
     value: '20'
 scripts:
@@ -85,25 +85,25 @@ examples:
               {
                 "id": "string",
                 "orderId": "string",
-                "amount": 8789.341123905506,
+                "amount": 3210.753842396452,
                 "currency": "USD",
-                "status": "refunded",
+                "status": "failed",
                 "method": "credit_card",
-                "createdAt": "2010-10-08T04:26:24.059Z",
-                "completedAt": "2010-08-04T00:41:28.588Z"
+                "createdAt": "2011-11-30T19:22:41.161Z",
+                "completedAt": "1975-12-22T18:22:20.978Z"
               },
               {
                 "id": "string",
                 "orderId": "string",
-                "amount": 9851.992046951094,
+                "amount": 3629.279104765124,
                 "currency": "USD",
-                "status": "failed",
+                "status": "completed",
                 "method": "debit_card",
-                "createdAt": "2013-03-21T14:03:00.768Z",
-                "completedAt": "2002-05-05T01:59:30.642Z"
+                "createdAt": "1973-12-14T01:37:02.172Z",
+                "completedAt": "2004-03-09T11:34:15.735Z"
               }
             ],
-            "total": 5262
+            "total": 7849
           }
       headers:
         - key: Content-Type
